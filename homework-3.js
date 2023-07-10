@@ -12,7 +12,7 @@ function isNumber(symbol) {
 }
 
 function isLetter(symbol) {
-	return /^[a-zA-Z]$/.test(symbol);
+	return /^[a-zA-Zа-яА-Я]$/.test(symbol);
 }
 
 function checkArr(arr, type) {
@@ -776,7 +776,6 @@ function cipherCaesar(str, offset) {
 	return encryptedCaesarArr.join('');
 
 	function encryptCaesar(symbolCode, offset) {
-		debugger
 		mainLoop:
 		for(let range of symbolCodeRange) {
 			let {start, end} = range;
@@ -823,71 +822,39 @@ function isAnagram(str1, str2) {
 
 
 /**TASK 21*/
-let test21 = {
-	name: "Arseniy",
-	age: 24,
-	course: 3,
-	department: "Computer Science",
-}
-let test21_1 = {
-	name: "Renat",
-	age: 23,
-	course: 2,
-	department: "Engineering",
-}
-let test21_2 = {
-	name: "Nastia",
-	age: 22,
-	course: 1,
-	department: "Economics",
-}
+let test21 = {name: "Arseniy", age: 24, course: 3, department: "Computer Science",}
+let test21_1 = { name: "Renat", age: 23, course: 2, department: "Engineering",}
+let test21_2 = {name: "Nastia", age: 22, course: 1, department: "Economics",}
+let test21_3 = {name: "Andrey", age: 25, course: 3, department: "Computer Science",}
 
 let University = createUniversity();
+/*
 console.log( University.addStudent(test21));
 console.log( University.addStudent(test21_1));
 console.log( University.addStudent(test21_2));
+console.log( University.addStudent(test21_3));
 console.log( University.removeStudent(1));
 console.log( University.findStudent(2));
+console.log( University.getStudentsFromCourse(3));
+console.log( University.getStudentsFromDepartment("Economics"));
+*/
 
 function createUniversity() {
-	let University = {
-		students: [],
-		course: {
-			1: {
-				dean: "Aarav",
-				students: [],
-			},
-			2: {
-				dean: "Kunal",
-				students: [],
-			},
-			3: {
-				dean: "Nisha",
-				students: [],
-			},
-		},
-		department: {
-			"Computer Science": {
-				specialties: [112, 121],
-				students: [],
-			},
-			"Economics": {
-				specialties: [161, 162],
-				students: [],
-			},
-			"Engineering": {
-				specialties: [34, 35, 36],
-				students: [],
-			},
-		},
+  class University {
+    constructor(name = "Unnamed") {
+      this.name = name;
+      this.students = [];
+      this.course = {};
+      this.department = {};
+    }
 
-		addStudent(props) {
+    addStudent(props) {
 			let cloneProps = JSON.parse( JSON.stringify(props));			
 			if(checkRequiredFields(cloneProps) instanceof Error) {
 				return checkRequiredFields(cloneProps);
 			}
 
-			const newStudentId = this.students.length;
+			const newStudentId = this.generateStudentId();
 			cloneProps.id = newStudentId;
 			const newStudent = new Student(cloneProps);
 
@@ -895,7 +862,12 @@ function createUniversity() {
 			this.course[newStudent.course].students.push(newStudent.id);
 			this.department[newStudent.department].students.push(newStudent.id);
 			return `Students with id: ${newStudentId} added`;
-		},
+		}
+
+    generateStudentId() {
+      if(this.students.length === 0) {return 0}
+      return this.students[this.students.length - 1].id + 1;
+    }
 
 		removeStudent(studentId) {
 			if(!isNumber(studentId)) {return new UnvalidValueError(studentId)}
@@ -917,8 +889,8 @@ function createUniversity() {
 				}
 			}
 			this.students.splice(indexStudent, 1);
-			return `Student with id ${studentId} removed`;
-		},
+			return `Student with id: ${studentId} removed`;
+		}
 
 		findStudent(studentId) {
 			if(!isNumber(studentId)) {return new UnvalidValueError(studentId)}
@@ -926,12 +898,43 @@ function createUniversity() {
 
 			if(student === undefined) {return Error(`Cant find student with id: "${studentId}"`)}
 			return student;
-		},
-
-		getStudentsFormCourse(course) {
-			
 		}
-	}
+
+		getStudentsFromCourse(course) {
+			if(!isNumber(course)) { return new UnvalidValueError(course); }
+      if(course < 1 || course > Object.keys(this.course).length) {
+        return new Error(`This course: "${course}" didn't exist`);
+      }
+
+      let studentsCourseId = this.course[course].students;
+      return studentsCourseId.map((id) => this.findStudent(id));
+		}
+
+    getStudentsFromDepartment(department) {
+      if(typeof department !== "string" || department == "") {return new UnvalidValueError(str)}
+      const allDepartment = Object.keys(this.department);
+      if(!allDepartment.includes(department)) {return new Error(`Can't find department ${department}`)}
+
+      let studentsDepartmentId = this.department[department].students;
+      return studentsDepartmentId.map((id) => this.findStudent(id));
+    }
+  } 
+
+  class ZimbabweUniversity extends University {
+    constructor(name = "Akujaku") {
+      super(name);
+      this.course = {
+        1: {"responsible": "Mohammed", students: [],},
+        2: {"responsible": "Kunal", students: [],},
+        3: {"responsible": "Nisha", students: [],},
+      };
+      this.department = {
+        "Computer Science": {specialties: [112, 121], students: [],},
+        "Economics": {specialties: [161, 162], students: [],},
+        "Engineering": {specialties: [34, 35, 36], students: [],},
+      };
+    }
+  }
 	
 	class Student {
 		constructor(props) {
@@ -975,5 +978,128 @@ function createUniversity() {
 		}
 	}
 
-	return University;
+	return new ZimbabweUniversity();
+}
+
+
+/**TASK 22*/
+let test22 = `
+"Deep within the arid expanse of Nevada's desert," exclaimed the intrepid explorer, "lies the enigmatic realm of Area 51, shrouded in a veil of secrecy and veiled whispers!" Legends of extraterrestrial encounters and cutting-edge technology intertwine, leaving no stone unturned. But amidst the sprawling hangars and restricted zones. Are we truly alone in the cosmos? What secrets does Area 51 hold? With bated breath, seekers of truth embark on a journey, driven by an unyielding desire to unravel the cosmic tapestry that awaits beyond our earthly confines. In the realm of Area 51, where legends merge with reality, the secrets of the universe shall finally be unleashed!"
+`;
+let test22_1 = "word. New.  \t\n\r word. And... Other... text.";
+
+console.log( textAnalysis(test22));
+
+function textAnalysis(text) {
+  if(typeof text !== "string") {return new UnvalidValueError(text)}
+  if(text.length === 0) {return new Error("Function get empty string")}
+
+  let clearWhiteSpaceText = clearWhiteSpase(text);
+  let sentenceCount = getSentencesCount(clearWhiteSpaceText);
+  let arrOfStr = clearWhiteSpaceText.split(" ");
+  let clearArrStr = trimPunctuation(arrOfStr);
+  let wordsArr = clearNumber(clearArrStr);
+  let wordsCount = getWordsCount(wordsArr);
+
+  return `
+  words: ${wordsCount}\n
+  sentences: ${sentenceCount}\n
+  symbols: ${''}\n
+  most used words: ${''}
+  `
+
+  function clearWhiteSpase(text) {
+    return text.replace(/[\t\n\r]/g, "");
+  }
+
+  function getSentencesCount(text) {
+    const separatorDot = "."; //dot can be sentence separator or not be; And dot can be "..." which again can be separator or not!
+    const sentenceSeparators = ["?", "!"];
+    let sentenceCount = 0;
+
+    sentenceCount += calcSentences(text, separatorDot);
+
+    /**Find more separator*/
+    for(const separator of sentenceSeparators) {
+      const separatorRegex = new RegExp(escapeRegExp(separator), "g");
+      const matches = text.match(separatorRegex);
+  
+      if (matches) {
+        sentenceCount += matches.length;
+      }
+    }
+    return sentenceCount;
+
+
+    function calcSentences(text, separator) {
+      if(text === undefined || separator === undefined) {throw new Error("calcSentences() take unexpected argument")}
+      let count = 0;
+      let currentPosition = text.indexOf(separator);
+      if(currentPosition === -1) {return 0}
+
+      while(currentPosition !== -1) {
+        //check next symbol after finded
+        let nextIndex = currentPosition + 1;
+        if(text.charAt(nextIndex) === "") {
+          count++;
+          break;
+        }
+
+        while(text.charAt(nextIndex) === " ") {
+          nextIndex++;
+        }
+
+        if(isUpperLetter( text.charAt(nextIndex))) { 
+          count++; //if letter after separator is UPPER case letter, success, i find sentences
+        }
+        currentPosition = text.indexOf(separator, currentPosition + 1);
+      }
+      return count;
+    }
+  }
+
+  function trimPunctuation(arr) {
+    const punctuationMarks = [".", "?", "!", "...", "?..", "!..", ",", ":", ";", "\"", "'", "`", "«", "»", "(", ")", "[", "]", "{", "}", "-", "—", "...", "\\", "/", ];
+    const strArr = [...arr]; //copy arr, not change basic arr
+
+    let trimStrArr = strArr.map((str) => {
+      while(punctuationMarks.includes(str[0])) {
+        str = str.slice(1);
+      }
+
+      while(punctuationMarks.includes(str[str.length - 1])) {
+        str = str.slice(0, str.length - 1);
+      }
+      return str;
+    });
+    return trimStrArr;
+  }
+
+  function clearNumber(arr) {
+    let wordArr = arr.filter((str) => !isFinite(str)); //isFinite(" ") returns true
+    console.log(wordArr);
+    return wordArr;
+  }
+
+  function getWordsCount(wordArr) {
+    return wordArr.length;
+  }
+
+  function getMostUsedWords() {
+  }
+
+  function isUpperLetter(symbol) {
+    const latinUpperLetter = {start: 65, end: 90};
+    const cyrillicUpperLetter = {start: 1040, end: 1071};
+    const symbolCode = symbol.charCodeAt(0);
+
+    if(latinUpperLetter.start <= symbolCode && symbolCode <= latinUpperLetter.end) {return true}
+    if(cyrillicUpperLetter.start <= symbolCode && symbolCode <= cyrillicUpperLetter.end) {return true}
+    return false;
+  }
+
+  //I use escape function because "." "?" and some other symbol create conflict during create new RegExp
+  function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
 }
