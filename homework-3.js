@@ -25,6 +25,14 @@ function checkArr(arr, type) {
 	return true;
 }
 
+function sort2DArr([key1, value1], [key2, value2]) {
+	if(key1 === undefined ||
+		 key2 === undefined ||
+		 value1 === undefined ||
+		 value2 === undefined) {throw new Error("sort2DArr() got unexpected value")}
+	return value2 - value1;
+}
+
 function findAllSubstrPosition(sbstr, str) {
 	let currentPosition = str.indexOf(sbstr);
 	let positionArr = [];
@@ -679,10 +687,6 @@ function sortByFrequencySymbols(str) {
 	
 	return str;
 	
-	function sort2DArr([key1, value1], [key2, value2]) {
-		return value2 - value1;
-	}
-	
 	function decrypt([char, count]) {
 		let tempStr = "";
 		
@@ -983,9 +987,7 @@ function createUniversity() {
 
 
 /**TASK 22*/
-let test22 = `
-"Deep within the arid expanse of Nevada's desert," exclaimed the intrepid explorer, "lies the enigmatic realm of Area 51, shrouded in a veil of secrecy and veiled whispers!" Legends of extraterrestrial encounters and cutting-edge technology intertwine, leaving no stone unturned. But amidst the sprawling hangars and restricted zones. Are we truly alone in the cosmos? What secrets does Area 51 hold? With bated breath, seekers of truth embark on a journey, driven by an unyielding desire to unravel the cosmic tapestry that awaits beyond our earthly confines. In the realm of Area 51, where legends merge with reality, the secrets of the universe shall finally be unleashed!"
-`;
+let test22 = `"Deep within the arid expanse of Nevada's desert," exclaimed the intrepid explorer, "lies the enigmatic realm of Area 51, shrouded in a veil of secrecy and veiled whispers!" Legends of extraterrestrial encounters and cutting-edge technology intertwine, leaving no stone unturned. But amidst the sprawling hangars and restricted zones. Are we truly alone in the cosmos? What secrets does Area 51 hold? With bated breath, seekers of truth embark on a journey, driven by an unyielding desire to unravel the cosmic tapestry that awaits beyond our earthly confines. In the realm of Area 51, where legends merge with reality, the secrets of the universe shall finally be unleashed!`;
 let test22_1 = "word. New.  \t\n\r word. And... Other... text.";
 
 console.log( textAnalysis(test22));
@@ -994,19 +996,26 @@ function textAnalysis(text) {
   if(typeof text !== "string") {return new UnvalidValueError(text)}
   if(text.length === 0) {return new Error("Function get empty string")}
 
+	let symbolsCount = getSymbolsCount(text);
   let clearWhiteSpaceText = clearWhiteSpase(text);
   let sentenceCount = getSentencesCount(clearWhiteSpaceText);
   let arrOfStr = clearWhiteSpaceText.split(" ");
+
   let clearArrStr = trimPunctuation(arrOfStr);
   let wordsArr = clearNumber(clearArrStr);
   let wordsCount = getWordsCount(wordsArr);
+	let mostUsedWords = getMostUsedWords(wordsArr);
 
   return `
-  words: ${wordsCount}\n
-  sentences: ${sentenceCount}\n
-  symbols: ${''}\n
-  most used words: ${''}
+  words: ${wordsCount}\n\r
+  sentences: ${sentenceCount}\n\r
+  symbols: ${symbolsCount}\n\r
+  most used words: ${mostUsedWords}
   `
+
+	function getSymbolsCount(text) {
+		return text.split('').length;
+	}
 
   function clearWhiteSpase(text) {
     return text.replace(/[\t\n\r]/g, "");
@@ -1056,6 +1065,21 @@ function textAnalysis(text) {
       }
       return count;
     }
+
+		//I use escape function because "." "?" and some other symbol create conflict during create new RegExp
+		function escapeRegExp(string) {
+			return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		}
+
+		function isUpperLetter(symbol) {
+			const latinUpperLetter = {start: 65, end: 90};
+			const cyrillicUpperLetter = {start: 1040, end: 1071};
+			const symbolCode = symbol.charCodeAt(0);
+	
+			if(latinUpperLetter.start <= symbolCode && symbolCode <= latinUpperLetter.end) {return true}
+			if(cyrillicUpperLetter.start <= symbolCode && symbolCode <= cyrillicUpperLetter.end) {return true}
+			return false;
+		}
   }
 
   function trimPunctuation(arr) {
@@ -1077,7 +1101,6 @@ function textAnalysis(text) {
 
   function clearNumber(arr) {
     let wordArr = arr.filter((str) => !isFinite(str)); //isFinite(" ") returns true
-    console.log(wordArr);
     return wordArr;
   }
 
@@ -1085,21 +1108,26 @@ function textAnalysis(text) {
     return wordArr.length;
   }
 
-  function getMostUsedWords() {
-  }
+  function getMostUsedWords(wordArr) {
+		let statistic = {};
 
-  function isUpperLetter(symbol) {
-    const latinUpperLetter = {start: 65, end: 90};
-    const cyrillicUpperLetter = {start: 1040, end: 1071};
-    const symbolCode = symbol.charCodeAt(0);
+		for(const word of wordArr) {
+			if(statistic[word]) {
+				statistic[word]++;
+				continue;
+			}
+			statistic[word] = 1;
+		}
 
-    if(latinUpperLetter.start <= symbolCode && symbolCode <= latinUpperLetter.end) {return true}
-    if(cyrillicUpperLetter.start <= symbolCode && symbolCode <= cyrillicUpperLetter.end) {return true}
-    return false;
-  }
+		let unsortedArrStatistic = Object.entries(statistic);
+		let sortArrStatistic = unsortedArrStatistic.sort(sort2DArr);
+		let mostUsed = sortArrStatistic.slice(0, 5);
+		let mostUsedStr = '\n';
 
-  //I use escape function because "." "?" and some other symbol create conflict during create new RegExp
-  function escapeRegExp(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		for(let [key, value] of mostUsed) {
+			mostUsedStr = mostUsedStr + "\t\t\t\t* \""+ key + "\":  " + value + " times\n";
+		}
+
+		return mostUsedStr;
   }
 }
