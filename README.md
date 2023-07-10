@@ -1,5 +1,5 @@
 # JS_Alhgorithm
-third project in Sigma Software university
+Third project in Sigma Software university
 
 **Задача1**
 
