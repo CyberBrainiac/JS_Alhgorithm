@@ -260,6 +260,14 @@ function swapKeyToValue(obj) {
 	
 	return swapObj;
 }
+/**2 Variant From Sigma course*/
+function changeKeyValue(obj) {
+	return Object.entries(obj).reduce((acc, [key, value]) => {
+			acc[value] = key;
+			return acc;
+	}, {});
+}
+
 
 
 /*TASK 8*/
